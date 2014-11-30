@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset='utf-8'>
+    <meta content='width=device-width, initial-scale=1' name='viewport'>
+    <title>JSON-ROA (Beta)</title>
+    <link href="/stylesheets/app-dcff9da2.css" rel="stylesheet" type="text/css" />
+    <script src="/javascripts/app-eca7008a.js" type="text/javascript"></script>
+  </head>
+  <body class='specification'>
+    <div class='container'>
+      <nav class='navbar navbar-default' role='navigation'>
+        <div class='navbar-header'>
+          <a class='navbar-brand' href='index.html'>
+            JSON-ROA
+            <em>(BETA)</em>
+          </a>
+        </div>
+        <div class='navbar-collapse collapse'>
+          <ul class='nav navbar-nav'>
+            <li>
+              <a href='specification.html'>Specification</a>
+            </li>
+          </ul>
+        </div>
+      </nav>
+      <h1>Specification and Interpretation</h1>
+      This is an informal specification of the JSON-ROA extension and
+      how clients should interpret and use it.
+      <h2>Content-Type</h2>
+      <code>application/json-roa+json</code>
+      <h2>The JSON-ROA Object</h2>
+      <div class='row'>
+        <div class='col-md-6'>
+          <p>A minimal valid JSON-ROA extension is introduced with <code>_json-roa</code>. It
+          must contain the key <code>version</code> where the value must be formatted
+          according to <a href="http://semver.org/">Semantic Versioning</a>.</p>
+          
+          <p>It may further contain the keys <code>relations</code>, <code>collection</code>, <code>name</code>, and
+          <code>self-relation</code>. See <a href="#relation">Relations</a>, <a href="#collection">Colletion</a>,
+          and <a href="#relation">Relation</a> for the specification of the corresponding
+          values.</p>
+        </div>
+        <div class='col-md-6'>
+          <div class="highlight json"><table style="border-spacing: 0"><tbody><tr><td class="gutter gl" style="text-align: right"><pre class="lineno">1&#x000A;2&#x000A;3&#x000A;4</pre></td><td class="code"><pre><span class="p">{</span><span class="w"> </span><span class="s2">"_json-roa"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="s2">"version"</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="s2">"0.0.0-beta.0+20141126"</span><span class="w"> </span><span class="p">}</span><span class="w">&#x000A;  </span><span class="p">,</span><span class="w"> </span><span class="s2">"x"</span><span class="p">:</span><span class="w"> </span><span class="s2">"some other data"</span><span class="w">&#x000A;  </span><span class="p">,</span><span class="w"> </span><span class="s2">"y"</span><span class="p">:</span><span class="w"> </span><span class="mi">42</span><span class="w">&#x000A;  </span><span class="p">,</span><span class="w"> </span><span class="s2">"z"</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="w"> </span><span class="p">}</span><span class="w">&#x000A;</span></pre></td></tr></tbody></table>
+          </div>
+        </div>
+      </div>
+      <div class='row'>
+        <div class='col-md-6'>
+          If the top level container is an array the JSON-ROA extension is located in the first position.
+        </div>
+        <div class='col-md-6'>
+          <div class="highlight json"><table style="border-spacing: 0"><tbody><tr><td class="gutter gl" style="text-align: right"><pre class="lineno">1&#x000A;2&#x000A;3</pre></td><td class="code"><pre><span class="p">[</span><span class="w"> </span><span class="p">{</span><span class="s2">"_json-roa"</span><span class="p">:</span><span class="w">&#x000A;    </span><span class="p">{</span><span class="w"> </span><span class="s2">"version"</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="s2">"0.0.0-beta.0+20141126"</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="p">}</span><span class="w">&#x000A;  </span><span class="p">,</span><span class="w"> </span><span class="mi">42</span><span class="w"> </span><span class="p">]</span><span class="w">&#x000A;</span></pre></td></tr></tbody></table>
+          </div>
+        </div>
+      </div>
+      <section id='relations'>
+        <h3>The Relations Object</h3>
+        <div class='row'>
+          <div class='col-md-6'>
+            <p>Relations is an object where the keys are <em>relation-identifiers</em> and each
+            corresponding value is a <a href="#relation">relation</a> object.</p>
+          </div>
+          <div class='col-md-6'>
+            <div class="highlight json"><table style="border-spacing: 0"><tbody><tr><td class="gutter gl" style="text-align: right"><pre class="lineno">1&#x000A;2&#x000A;3&#x000A;4&#x000A;5</pre></td><td class="code"><pre><span class="p">{</span><span class="w"> </span><span class="s2">"_json-roa"</span><span class="p">:</span><span class="w">&#x000A;  </span><span class="p">{</span><span class="w"> </span><span class="s2">"version"</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="s2">"0.0.0-beta.0+20141126"</span><span class="w">&#x000A;  </span><span class="p">,</span><span class="w"> </span><span class="s2">"relations"</span><span class="p">:</span><span class="w"> &#x000A;      </span><span class="p">{</span><span class="w"> </span><span class="s2">"t42"</span><span class="w"> </span><span class="p">:</span><span class="w"> &#x000A;        </span><span class="p">{</span><span class="w"> </span><span class="err">href</span><span class="p">:</span><span class="w"> </span><span class="s2">"/task/42"</span><span class="p">}</span><span class="w"> </span><span class="p">}}}</span><span class="w">&#x000A;</span></pre></td></tr></tbody></table>
+            </div>
+          </div>
+        </div>
+      </section>
+      <section id='relation-identifier'>
+        <h3>
+          Context and Interpretation of the Relation-Identifier
+        </h3>
+        <div class='row'>
+          <div class='col-md-6'>
+            <p>The <strong>identifier of a relation</strong> is meant to be used in clients to dereference
+            the relation object and in particular use the <code>href</code>-value within. </p>
+            
+            <p>The example is taken from working with the <a href="https://github.com/json-roa/json-roa_ruby-client">JSON-ROA Ruby Client</a>.
+            A resource <code>execution</code> has a relation with the identifier <code>tasks</code> which is
+            used to perform an http GET request on URL given by the href-value.</p>
+          </div>
+          <div class='col-md-6'>
+            <div class="highlight ruby"><table style="border-spacing: 0"><tbody><tr><td class="gutter gl" style="text-align: right"><pre class="lineno">1</pre></td><td class="code"><pre><span class="n">execution</span><span class="p">.</span><span class="nf">relation</span><span class="p">(</span><span class="s1">'tasks'</span><span class="p">).</span><span class="nf">get</span><span class="p">()</span></pre></td></tr></tbody></table>
+            </div>
+          </div>
+        </div>
+      </section>
+      <section id='relation'>
+        <h3>The Relation Object</h3>
+        <div class='row'>
+          <div class='col-md-6'>
+            <p>A relation is an object which must contain the key <code>href</code>. It may contain the
+            keys <code>name</code>, <code>methods</code>, and <code>relations</code>.</p>
+          </div>
+          <div class='col-md-6'>
+            <div class="highlight json"><table style="border-spacing: 0"><tbody><tr><td class="gutter gl" style="text-align: right"><pre class="lineno">1&#x000A;2</pre></td><td class="code"><pre><span class="p">{</span><span class="w"> </span><span class="s2">"name"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Tasks"</span><span class="w">&#x000A;  </span><span class="s2">"href"</span><span class="err">:</span><span class="w"> </span><span class="s2">"/tasks/"</span><span class="w"> </span><span class="p">}</span><span class="w">&#x000A;</span></pre></td></tr></tbody></table>
+            </div>
+          </div>
+        </div>
+        <section id='relation'>
+          <h4>The Href Value</h4>
+          <div class='row'>
+            <div class='col-md-6'>
+              <p>The value of <code>href</code> is a string and represents an URI according to
+              <a href="https://tools.ietf.org/html/rfc3986">RFC3986 Uniform Resource Identifier</a>. It must at least contain a path
+              segment. The values before the path segment are inferred form the
+              current resource if not given. The URI may be templated according to
+              <a href="https://tools.ietf.org/html/rfc6570">RFC6570 URI Template</a>.</p>
+            </div>
+            <div class='col-md-6'>
+              <div class="highlight plaintext"><table style="border-spacing: 0"><tbody><tr><td class="gutter gl" style="text-align: right"><pre class="lineno">1</pre></td><td class="code"><pre>http://some-service.com/tasks/ </pre></td></tr></tbody></table>
+              </div>
+              <div class="highlight plaintext"><table style="border-spacing: 0"><tbody><tr><td class="gutter gl" style="text-align: right"><pre class="lineno">1</pre></td><td class="code"><pre>/task/{id}</pre></td></tr></tbody></table>
+              </div>
+            </div>
+          </div>
+        </section>
+        <section id='relation-name'>
+          <h4>Context and Interpretation of the Name Value</h4>
+          <div class='row'>
+            <div class='col-md-6'>
+              <p>The name should not be used for technical purposes. 
+              The name is used, e.g. by <a href="">The JSON-ROA Browser</a> to give a readable and
+              understandable output for the human user. </p>
+            </div>
+          </div>
+        </section>
+        <section id='relation-methods'>
+          <h4>The Methods Object</h4>
+          <div class='row'>
+            <div class='col-md-6'>
+              <p>The methods object may contain the keys <code>get</code>, <code>put</code>, <code>patch</code>, <code>post</code>, and <code>delete</code>. 
+              Each value is an empty object at this time. </p>
+              
+              <p>Clients should interpret the available HTTP-method to act on the
+              given url respectively resource they address. </p>
+              
+              <p>If the no <code>methods</code> are  given, clients should assume that 
+              <code>get</code> and only <code>get</code> is available. </p>
+            </div>
+            <div class='col-md-6'>
+              <div class="highlight json"><table style="border-spacing: 0"><tbody><tr><td class="gutter gl" style="text-align: right"><pre class="lineno">1&#x000A;2&#x000A;3&#x000A;4&#x000A;5</pre></td><td class="code"><pre><span class="p">{</span><span class="w"> </span><span class="s2">"name"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Tasks"</span><span class="w">&#x000A;</span><span class="p">,</span><span class="w"> </span><span class="s2">"href"</span><span class="p">:</span><span class="w"> </span><span class="s2">"/tasks/"</span><span class="w"> &#x000A;</span><span class="p">,</span><span class="w"> </span><span class="s2">"methods"</span><span class="p">:</span><span class="w"> &#x000A;  </span><span class="p">{</span><span class="w"> </span><span class="s2">"get"</span><span class="p">:</span><span class="w"> </span><span class="p">{}</span><span class="w"> &#x000A;  </span><span class="p">,</span><span class="w"> </span><span class="s2">"post"</span><span class="p">:</span><span class="w"> </span><span class="p">{}}}</span><span class="w">&#x000A;</span></pre></td></tr></tbody></table>
+              </div>
+              <div class="highlight json"><table style="border-spacing: 0"><tbody><tr><td class="gutter gl" style="text-align: right"><pre class="lineno">1&#x000A;2</pre></td><td class="code"><pre><span class="p">{</span><span class="w"> </span><span class="s2">"methods"</span><span class="p">:</span><span class="w"> &#x000A;  </span><span class="p">{</span><span class="w"> </span><span class="s2">"get"</span><span class="p">:</span><span class="w"> </span><span class="p">{}</span><span class="w"> </span><span class="p">}}</span><span class="w">&#x000A;</span></pre></td></tr></tbody></table>
+              </div>
+            </div>
+          </div>
+        </section>
+      </section>
+      <section id='collection'>
+        <h3>The Collection Object</h3>
+        <em>TODO</em>
+      </section>
+    </div>
+  </body>
+</html>
