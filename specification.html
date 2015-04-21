@@ -1,285 +1,438 @@
 <!DOCTYPE html>
 <html>
-  <head>
-    <meta charset='utf-8'>
-    <meta content='width=device-width, initial-scale=1' name='viewport'>
-    <title>JSON-ROA (Beta)</title>
-    <link href="/stylesheets/app-dcff9da2.css" rel="stylesheet" type="text/css" />
-    <script src="/javascripts/app-eca7008a.js" type="text/javascript"></script>
-  </head>
-  <body class='specification'>
-    <div class='container'>
-      <nav class='navbar navbar-default' role='navigation'>
-        <div class='navbar-header'>
-          <a class='navbar-brand' href='index.html'>
-            JSON-ROA
-            <em>(BETA)</em>
-          </a>
-        </div>
-        <div class='navbar-collapse collapse'>
-          <ul class='nav navbar-nav'>
-            <li>
-              <a href='specification.html'>Specification</a>
-            </li>
-            <li>
-              <a href='/browser/index.html'>The JSON-ROA Browser</a>
-            </li>
-          </ul>
-        </div>
-      </nav>
-      
-      <h1 id="specification-and-interpretation">Specification and Interpretation</h1>
-      
-      <p>This is an informal specification of the JSON-ROA extension and
-      how clients should interpret and use it.</p>
-      
-      <p>This specification is feature complete but not finished and may thus change at
-      any time. Once finished JSON-ROA shall adapt semantic versioning.</p>
-      
-      <h2 id="the-content-type">The Content-Type</h2>
-      
-      <p>The JSON-ROA extension shall be present if and only of the
-      resource is delivered with the content type <code>application/json-roa+json</code>.</p>
-      
-      <h2 id="the-json-roa-object">The JSON-ROA Object</h2>
-      
-      <div class="row">
-        <div class="col-md-6">
-      
-          <p>A minimal valid JSON-ROA extension is introduced with <code>_json-roa</code>. It
-      must contain the key <code>version</code> where the value must be formatted
-      according to <a href="http://semver.org/">Semantic Versioning</a>.</p>
-      
-          <p>It may further contain the keys <code>relations</code>, <code>collection</code>, <code>name</code>, and
-      <code>self-relation</code>. See the <a href="#the-relations-object">relations object</a>, the <a href="#the-collection-object">collection object</a>,
-      and the <a href="#the-relation-object">relation object</a> for the specification of the corresponding
-      values.</p>
-      
-        </div>
-        <div class="col-md-6">
-      
-          <pre><code>{ "_json-roa": { "version" : "0.0.0-beta.0+20141126" }
-        , "x": "some other data"
-        , "y": 42
-        , "z": false }
-      </code></pre>
-      
-        </div>
-      </div>
-      
-      <h3 id="the-relations-object">The Relations Object</h3>
-      
-      <div class="row">
-        <div class="col-md-6">
-      
-          <p>Relations is an object where the keys are <em>relation-identifiers</em> and each
-      corresponding value is a <a href="#the-relation-object">relation object</a>.</p>
-      
-        </div>
-        <div class="col-md-6">
-      
-          <pre><code>{ "_json-roa":
-        { "version" : "0.0.0-beta.0+20141126"
-        , "relations": 
-            { "t42" : 
-              { "href" : "/task/42"} }}}
-      </code></pre>
-      
-        </div>
-      </div>
-      
-      <h3 id="the-relation-identifier">The Relation Identifier</h3>
-      
-      <div class="row">
-        <div class="col-md-6">
-      
-          <p>The <strong>identifier of a relation</strong> is meant to be used in clients to dereference
-      the relation object and in particular use the <code>href</code>-value within. </p>
-      
-          <p>The example is taken from working with the <a href="https://github.com/json-roa/json-roa_ruby-client">JSON-ROA Ruby Client</a>. A
-      resource <code>execution</code> has a relation with the identifier <code>tasks</code> which is
-      used to perform an http GET request on URL given by the href-value.</p>
-      
-        </div>
-        <div class="col-md-6">
-          <pre><code>execution.relation('tasks').get()
-      </code></pre>
-        </div>
-      </div>
-      
-      <h3 id="the-relation-object">The Relation Object</h3>
-      <div class="row">
-        <div class="col-md-6">
-      
-          <p>A relation is an object which must contain the key <code>href</code>. It may
-      contain the keys <code>embedded</code>,<code>name</code>, <code>methods</code>, and <code>relations</code>. See the
-      section <a href="#meta-relations">Meta Relations</a> for the interpretation of <code>relations</code>. See
-      the section <a href="#embedding-resources">Embedding Resources</a> for usage and interpretation of
-      <code>embedded</code>.</p>
-      
-        </div>
-        <div class="col-md-6">
-          <pre><code>{ "name": "Tasks"
-        "href": "/tasks/" }
-      </code></pre>
-        </div>
-      </div>
-      
-      <h3 id="the-href-value">The Href Value</h3>
-      <div class="row">
-        <div class="col-md-6">
-      
-          <p>The value of <code>href</code> is a string and represents an URI according to
-      <a href="https://tools.ietf.org/html/rfc3986">RFC3986 Uniform Resource Identifier</a>. It must at least contain a path
-      segment. The values before the path segment are inferred form the
-      current resource if not given. The URI may be templated according to
-      <a href="https://tools.ietf.org/html/rfc6570">RFC6570 URI Template</a>.</p>
-      
-        </div>
-        <div class="col-md-6">
-      
-          <pre><code class="language-uri">http://some-service.com/tasks/ 
-      
-      /task/{id}
-      </code></pre>
-        </div>
-      </div>
-      
-      <h4 id="context-and-interpretation-of-the-name-value">Context and Interpretation of the Name Value</h4>
-      <div class="row">
-        <div class="col-md-6">
-      
-          <p>The name should not be used for technical purposes. 
-      The name is used, e.g. by <a href="">The JSON-ROA Browser</a> to give a readable and
-      understandable output for the human user. </p>
-        </div>
-      </div>
-      
-      <h3 id="the-methods-object">The Methods Object</h3>
-      <div class="row">
-        <div class="col-md-6">
-      
-          <p>The methods object may contain the keys <code>get</code>, <code>put</code>, <code>patch</code>, <code>post</code>, and <code>delete</code>. 
-      Each value is an empty object at this time. </p>
-      
-          <p>Clients should interpret the available HTTP-method to act on the
-      given url respectively resource they address. </p>
-      
-          <p>If the no <code>methods</code> are  given, clients should assume that 
-      <code>get</code> and only <code>get</code> is available. </p>
-      
-        </div>
-        <div class="col-md-6">
-      
-          <pre><code class="language-json">{ "name": "Tasks"
-      , "href": "/tasks/" 
-      , "methods": 
-        { "get": {} 
-        , "post": {}}}
-      
-      { "methods": 
-        { "get": {} }}
-      </code></pre>
-      
-        </div>
-      </div>
-      
-      <h4 id="meta-relations">Meta Relations</h4>
-      <div class="row">
-        <div class="col-md-6">
-      
-          <p>Relations of a Relation will often make little sense from an application
-      viewpoint. There are other mentionable use cases. The first is finding
-      documentation for humans. </p>
-      
-        </div>
-      </div>
-      
-      <h3 id="the-collection-object">The Collection Object</h3>
-      <div class="row">
-        <div class="col-md-6">
-      
-          <p>The <em>collection</em> object semantically links to a number 
-      of structurally equivalent resources. Conventionally
-      only url paths ending with a slash will, e.g. <code>/tasks/</code>
-      will contain a collection.</p>
-      
-          <p>The collection object must contain a <code>relations</code> key 
-      which contains a <a href="#relations">relations</a> as described. 
-      It is suggested to use integers as keys which represent 
-      the index of the given link within the collection.</p>
-      
-          <p>The collection can contain a <code>next</code> key with the value of a <a href="#the-relation-object">relation
-      object</a> with the following restriction: the included url may not be
-      templated. Clients use <code>next</code> to iterate of a paginated collection. API
-      providers should keep the search parameters between successive next link
-      (with the exception of the parameter used for pagination if present).</p>
-      
-          <p>Any of the following to conditions signals the end of the 
-      iteration for a client: </p>
-      
-          <ol>
-            <li>The relations object is empty. </li>
-            <li>There is no next key respectively object.</li>
-          </ol>
-      
-        </div>
-        <div class="col-md-6">
-          <pre><code>"collection": {
-          "next": {
-            "href": "/tasks/?page=1"
-          },
-          "relations": {
-            "1": {
-              "name": "Task",
-              "href": "/task/6d5033f4-768f-55af-8efe-11e563f4af93"
-            },
-            "2": {
-              "name": "Task",
-              "href": "/task/2a8f061f-26dc-5b41-af9c-84f9ba54679a"
-            },
-      </code></pre>
-        </div>
-      </div>
-      
-      <h3 id="embedding-resources">Embedding Resources</h3>
-      
-      <div class="row">
-        <div class="col-md-6">
-          <p class="text-warning">Embedding resources is an experimental proposal. There does
-      not exist any implementation or proof of concept at this time.</p>
-      
-          <p>A <a href="#the-relation-object">relation object</a> can contain the key <code>embedded</code>. The corresponding
-      value must be equal to the to JSON transformed response body given by
-      requesting the resource with http get and receiving the representation
-      of content-type <code>application/json-roa+json</code>. Some restrictions apply:</p>
-      
-          <ol>
-            <li>
-              <p>The <code>href</code> value of the relation must not be a template url.  </p>
-            </li>
-            <li>
-              <p>The http get method must be applicable to the resource. </p>
-            </li>
-          </ol>
-      
-          <p>Handling of embedded resources must be completely transparent. I.e. 
-      clients must not depend on the existence of an embedded object. On 
-      the other hand are clients not required to honor <code>embedded</code> 
-      resources.</p>
-      
-          <p>JSON-ROA does not define any technique how to negotiate respectively 
-      request embeddings. This is application and context dependent. A 
-      custom HTTP header seems to be appropriate for many cases. </p>
-      
-        </div>
-        <div class="col-md-6"></div>
-      </div>
-      
-      <div class="row">
-        <div class="col-md-6"></div>
-        <div class="col-md-6"></div>
-      </div>
-    </div>
-  </body>
+<head>
+<meta charset='utf-8'>
+<meta content='width=device-width, initial-scale=1' name='viewport'>
+<title>JSON-ROA</title>
+<title>
+<span>JSON-ROA</span>
+<span>- Specification</span>
+</title>
+<link href="/stylesheets/app-c6d5bda8.css" rel="stylesheet" type="text/css" />
+<script src="/javascripts/app-eca7008a.js" type="text/javascript"></script>
+</head>
+<body class='specification'>
+<div class='container'>
+<nav class='navbar navbar-default' role='navigation'>
+<div class='navbar-header'>
+<a class='navbar-brand' href='index.html'>
+JSON-ROA
+<em>1.0.0</em>
+</a>
+</div>
+<div class='navbar-collapse collapse'>
+<ul class='nav navbar-nav'>
+<li>
+<a href='specification.html'>
+Specification
+</a>
+</li>
+<li>
+<a href='lib.html'>
+Libraries
+</a>
+</li>
+<li>
+<a href='about.html'>
+About
+</a>
+</li>
+</ul>
+</div>
+</nav>
+
+<h1 id="specification" class="no_toc">Specification and Interpretation</h1>
+
+<p>This is an informal specification of the JSON-ROA extension and how clients
+must interpret it.</p>
+
+<p>We also provide some examples for illustration. These are mostly taken form the
+<a href="https://json-roa-demo.herokuapp.com/api-browser/index.html#/">JSON-ROA Demonstration Application</a>.</p>
+
+<h2 class="no_toc" id="table-of-contents">Table of Contents</h2>
+<ul id="markdown-toc">
+  <li><a id="markdown-toc-general" href="#general">General Properties</a>    <ul>
+      <li><a id="markdown-toc-semantic-versioning" href="#semantic-versioning">Semantic Versioning</a></li>
+      <li><a id="markdown-toc-content-type" href="#content-type">The Content-Type</a></li>
+    </ul>
+  </li>
+  <li><a id="markdown-toc-json-roa-object" href="#json-roa-object">The JSON-ROA Object</a>    <ul>
+      <li><a id="markdown-toc-relations-object" href="#relations-object">The Relations Object</a>        <ul>
+          <li><a id="markdown-toc-relation-identifier" href="#relation-identifier">The Relation Identifier</a></li>
+          <li><a id="markdown-toc-relation-object" href="#relation-object">The Relation Object</a>            <ul>
+              <li><a id="markdown-toc-href-value" href="#href-value">The Href Value</a></li>
+              <li><a id="markdown-toc-name-value" href="#name-value">The Name Value</a></li>
+              <li><a id="markdown-toc-methods" href="#methods">The Methods Object</a></li>
+              <li><a id="markdown-toc-meta-relations" href="#meta-relations">Meta Relations</a></li>
+            </ul>
+          </li>
+        </ul>
+      </li>
+      <li><a id="markdown-toc-collection-object" href="#collection-object">The Collection Object</a></li>
+    </ul>
+  </li>
+  <li><a id="markdown-toc-embedding-resources" href="#embedding-resources">Embedding Resources</a></li>
+</ul>
+
+<h2 id="general">General Properties</h2>
+
+<h3 id="semantic-versioning">Semantic Versioning</h3>
+
+<p>JSON-ROA uses <a href="http://semver.org/">Semantic Versioning</a>.  The semantics apply to the <a href="#json-roa-object">JSON-ROA
+Object</a> itself and precisely whether changes thereof would break JSON-ROA
+clients implemented for an earlier version. Experimental properties are
+excluded from this rule.</p>
+
+<p>A client <strong>must</strong> evaluate the given semantic version and it <strong>must fail</strong> with
+an appropriate error if it is not compatible with the given <em>major number</em>. It
+may indicate discrepancies of the <em>minor number</em> but it <strong>must process</strong> the
+request.</p>
+
+<p class="text-warning">The semantic version of JSON-ROA is strictly limited to JSON-ROA itself. It
+does not apply to the application.</p>
+
+<h3 id="content-type">The Content-Type</h3>
+
+<p>The JSON-ROA extension shall be present if and only if the resource is
+delivered with the content type <code>application/json-roa+json</code>.</p>
+
+<h2 id="json-roa-object">The JSON-ROA Object</h2>
+
+<div class="row">
+  <div class="col-md-6">
+
+    <p>The JSON-ROA Object is located under the <code>_json-roa</code> key if the top level
+element is an object. If the top level element is an array the first element is
+a map with the <code>_json-roa</code> key and the corresponding map underneath.</p>
+
+    <p class="text-info">In this sense, a given json-object can be extended by adding  a <code>_json-roa</code> key
+including its object.  A given json-array can be extended by placing an object
+which includes a <code>_json-roa</code> key and its corresponding object in the first
+position.</p>
+
+    <p class="text-warning">It is discouraged to use arrays as the outer most data structure. Maps 
+are more flexible and can be extended in less obtrusive way.</p>
+
+    <p>A minimal valid JSON-ROA extension must contain the key <code>version</code>
+where the value must be formatted according to <a href="http://semver.org/">Semantic Versioning</a>. See
+also the <a href="#semantic-versioning">section Semantic Versioning</a>.</p>
+
+    <p>It may further contain the keys <code>relations</code>, <code>collection</code>, <code>name</code>, and
+<code>self-relation</code>. See the <a href="#relations-object">relations object</a>, the <a href="#collection-object">collection object</a>,
+and the <a href="#relation-object">relation object</a> for the specification of the corresponding
+values.</p>
+
+  </div>
+  <div class="col-md-6">
+
+<div class="highlight json"><table style="border-spacing: 0"><tbody><tr><td class="gutter gl" style="text-align: right"><pre class="lineno">1
+2
+3
+4</pre></td><td class="code"><pre><span class="p">{</span><span class="w"> </span><span class="s2">"_json-roa"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="s2">"version"</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="s2">"1.0.0"</span><span class="w"> </span><span class="p">}</span><span class="w">
+  </span><span class="p">,</span><span class="w"> </span><span class="s2">"x"</span><span class="p">:</span><span class="w"> </span><span class="s2">"some other data"</span><span class="w">
+  </span><span class="p">,</span><span class="w"> </span><span class="s2">"y"</span><span class="p">:</span><span class="w"> </span><span class="mi">42</span><span class="w">
+  </span><span class="p">,</span><span class="w"> </span><span class="s2">"z"</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="w"> </span><span class="p">}</span><span class="w">
+</span></pre></td></tr></tbody></table>
+</div>
+
+<div class="highlight json"><table style="border-spacing: 0"><tbody><tr><td class="gutter gl" style="text-align: right"><pre class="lineno">1
+2
+3
+4</pre></td><td class="code"><pre><span class="p">[</span><span class="w"> </span><span class="p">{</span><span class="s2">"_json-roa"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="s2">"version"</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="s2">"1.0.0"</span><span class="w"> </span><span class="p">}},</span><span class="w">
+  </span><span class="s2">"some other data"</span><span class="p">,</span><span class="w">
+  </span><span class="mi">42</span><span class="p">,</span><span class="w">
+  </span><span class="kc">false</span><span class="p">,</span><span class="w"> </span><span class="p">]</span><span class="w">
+</span></pre></td></tr></tbody></table>
+</div>
+
+  </div>
+</div>
+
+<h3 id="relations-object">The Relations Object</h3>
+
+<div class="row">
+  <div class="col-md-6">
+
+    <p>The key <code>relations</code> introduces a relations object. The keys in the next level
+within are <em>relation-identifiers</em> and the corresponding object is
+a <em>relation-object</em>, see the section [The Relation Object][].</p>
+
+  </div>
+  <div class="col-md-6">
+
+<div class="highlight json"><table style="border-spacing: 0"><tbody><tr><td class="gutter gl" style="text-align: right"><pre class="lineno">1
+2
+3
+4
+5</pre></td><td class="code"><pre><span class="p">{</span><span class="s2">"_json-roa"</span><span class="w"> </span><span class="p">:</span><span class="w">
+  </span><span class="p">{</span><span class="s2">"version"</span><span class="p">:</span><span class="w"> </span><span class="s2">"1.0.0"</span><span class="p">,</span><span class="w">
+    </span><span class="s2">"relations"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+      </span><span class="s2">"messages"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+        </span><span class="s2">"href"</span><span class="p">:</span><span class="w"> </span><span class="s2">"/messages/"</span><span class="w"> </span><span class="p">}}}}</span><span class="w">
+</span></pre></td></tr></tbody></table>
+</div>
+
+  </div>
+</div>
+
+<h4 id="relation-identifier">The Relation Identifier</h4>
+
+<div class="row">
+  <div class="col-md-6">
+
+    <p>The <strong>identifier of a relation</strong> is meant to be used in clients to dereference
+the relation object and in particular use the <code>href</code>-value therein. The example
+illustrates how to request the <code>messages</code> resource given a <code>root</code> resource with
+the <a href="https://github.com/json-roa/json-roa_ruby-client">JSON-ROA Ruby Client</a>.</p>
+
+  </div>
+  <div class="col-md-6">
+<div class="highlight ruby"><table style="border-spacing: 0"><tbody><tr><td class="gutter gl" style="text-align: right"><pre class="lineno">1</pre></td><td class="code"><pre><span class="n">root</span><span class="p">.</span><span class="nf">relation</span><span class="p">(</span><span class="s1">'messages'</span><span class="p">).</span><span class="nf">get</span><span class="p">()</span>
+</pre></td></tr></tbody></table>
+</div>
+  </div>
+</div>
+
+<h4 id="relation-object">The Relation Object</h4>
+<div class="row">
+  <div class="col-md-6">
+
+    <p>A relation is an object which must contain the key <code>href</code>. It may
+contain the keys <code>embedded</code>,<code>name</code>, <code>methods</code>, and <code>relations</code>. See the
+section <a href="#meta-relations">Meta Relations</a> for the interpretation of <code>relations</code>. See
+the section <a href="#embedding-resources">Embedding Resources</a> for usage and interpretation of
+<code>embedded</code>.</p>
+
+  </div>
+  <div class="col-md-6">
+<div class="highlight json"><table style="border-spacing: 0"><tbody><tr><td class="gutter gl" style="text-align: right"><pre class="lineno">1
+2
+3</pre></td><td class="code"><pre><span class="p">{</span><span class="w"> </span><span class="s2">"relations"</span><span class="p">:</span><span class="w"> 
+  </span><span class="p">{</span><span class="w"> </span><span class="s2">"messages"</span><span class="p">:</span><span class="w"> 
+    </span><span class="p">{</span><span class="w"> </span><span class="s2">"href"</span><span class="p">:</span><span class="w"> </span><span class="s2">"/messages/"</span><span class="w"> </span><span class="p">}}}</span><span class="w">
+</span></pre></td></tr></tbody></table>
+</div>
+  </div>
+</div>
+
+<h5 id="href-value">The Href Value</h5>
+<div class="row">
+  <div class="col-md-6">
+
+    <p>The value of the key <code>href</code> is a string and represents an URI according to
+<a href="https://tools.ietf.org/html/rfc3986">RFC3986 Uniform Resource Identifier</a>. It must at least contain a path
+segment. The values before the path segment are inferred form the current
+resource if they are not given. The URI may be templated according to <a href="https://tools.ietf.org/html/rfc6570">RFC6570
+URI Template</a>.</p>
+
+    <p>The second example shows how values for templated parameters can be submitted
+with the <a href="https://github.com/json-roa/json-roa_ruby-client">JSON-ROA Ruby Client</a>.</p>
+
+  </div>
+  <div class="col-md-6">
+
+<div class="highlight json"><table style="border-spacing: 0"><tbody><tr><td class="gutter gl" style="text-align: right"><pre class="lineno">1
+2
+3</pre></td><td class="code"><pre><span class="p">{</span><span class="w"> </span><span class="s2">"relations"</span><span class="p">:</span><span class="w"> 
+  </span><span class="p">{</span><span class="w"> </span><span class="s2">"message"</span><span class="p">:</span><span class="w"> 
+    </span><span class="p">{</span><span class="w"> </span><span class="s2">"href"</span><span class="p">:</span><span class="w"> </span><span class="s2">"/messages/{id}"</span><span class="p">}}}</span><span class="w">
+</span></pre></td></tr></tbody></table>
+</div>
+
+<div class="highlight ruby"><table style="border-spacing: 0"><tbody><tr><td class="gutter gl" style="text-align: right"><pre class="lineno">1
+2</pre></td><td class="code"><pre><span class="n">root</span><span class="p">.</span><span class="nf">relation</span><span class="p">(</span><span class="s1">'message'</span><span class="p">)</span> <span class="p">\</span>
+  <span class="p">.</span><span class="nf">get</span><span class="p">(</span><span class="s1">'id'</span> <span class="o">=&gt;</span> <span class="s1">'4e762513-d903-4228-b92c-da4f0cb3094b'</span><span class="p">)</span>
+</pre></td></tr></tbody></table>
+</div>
+
+  </div>
+</div>
+
+<h5 id="name-value">The Name Value</h5>
+<div class="row">
+  <div class="col-md-6">
+
+    <p>The name should not be used for technical purposes. The name is used, e.g. by
+the <a href="http://json-roa.github.io/browser/index.html">JSON-ROA Browser</a>, to give a understandable output for the human user.</p>
+
+  </div>
+  <div class="col-md-6">
+
+<div class="highlight json"><table style="border-spacing: 0"><tbody><tr><td class="gutter gl" style="text-align: right"><pre class="lineno">1
+2
+3
+4</pre></td><td class="code"><pre><span class="p">{</span><span class="w"> </span><span class="s2">"relations"</span><span class="p">:</span><span class="w"> 
+  </span><span class="p">{</span><span class="w"> </span><span class="s2">"message"</span><span class="p">:</span><span class="w"> 
+    </span><span class="p">{</span><span class="w"> </span><span class="s2">"href"</span><span class="p">:</span><span class="w"> </span><span class="s2">"/messages/{id}"</span><span class="p">,</span><span class="w"> 
+      </span><span class="s2">"name"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Message"</span><span class="p">}}}</span><span class="w">
+</span></pre></td></tr></tbody></table>
+</div>
+
+  </div>
+</div>
+
+<h5 id="methods">The Methods Object</h5>
+<div class="row">
+  <div class="col-md-6">
+
+    <p>The methods object may contain the keys <code>get</code>, <code>put</code>, <code>patch</code>, <code>post</code>, and <code>delete</code>. 
+Each value is an empty object at this time.</p>
+
+    <p>Clients should interpret the keys as the available HTTP-method to act on the
+given url respectively resource they address.</p>
+
+    <p>If the <strong>no</strong> <code>methods</code> are  given, clients <strong>must assume</strong> that <code>get</code> and only
+<code>get</code> is available.</p>
+
+  </div>
+  <div class="col-md-6">
+
+<div class="highlight json"><table style="border-spacing: 0"><tbody><tr><td class="gutter gl" style="text-align: right"><pre class="lineno">1
+2
+3
+4
+5
+6
+7</pre></td><td class="code"><pre><span class="p">{</span><span class="w"> </span><span class="s2">"relations"</span><span class="p">:</span><span class="w"> 
+  </span><span class="p">{</span><span class="w"> </span><span class="s2">"messages"</span><span class="p">:</span><span class="w"> 
+    </span><span class="p">{</span><span class="w"> </span><span class="s2">"href"</span><span class="p">:</span><span class="w"> </span><span class="s2">"/messages/"</span><span class="p">,</span><span class="w">
+      </span><span class="s2">"name"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Messages"</span><span class="p">,</span><span class="w">
+      </span><span class="s2">"methods"</span><span class="p">:</span><span class="w"> 
+        </span><span class="p">{</span><span class="w"> </span><span class="s2">"get"</span><span class="p">:</span><span class="w"> </span><span class="p">{},</span><span class="w">
+          </span><span class="s2">"post"</span><span class="p">:</span><span class="w"> </span><span class="p">{}}}}}</span><span class="w">
+</span></pre></td></tr></tbody></table>
+</div>
+
+  </div>
+</div>
+
+<h5 id="meta-relations">Meta Relations</h5>
+<div class="row">
+  <div class="col-md-6">
+
+    <p>A <a href="#relation-object">Relation Object</a> can itself contain a <a href="#relations-object">Relations Object</a> under the key
+<code>relations</code>. The primary use is to link to the corresponding resource
+documentation.</p>
+
+  </div>
+  <div class="col-md-6">
+
+<div class="highlight json"><table style="border-spacing: 0"><tbody><tr><td class="gutter gl" style="text-align: right"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+8
+9
+10</pre></td><td class="code"><pre><span class="p">{</span><span class="s2">"_json-roa"</span><span class="w"> </span><span class="p">:</span><span class="w">
+  </span><span class="p">{</span><span class="s2">"version"</span><span class="p">:</span><span class="w"> </span><span class="s2">"1.0.0"</span><span class="p">,</span><span class="w">
+    </span><span class="s2">"relations"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+      </span><span class="s2">"messages"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+        </span><span class="s2">"href"</span><span class="p">:</span><span class="w"> </span><span class="s2">"/messages/"</span><span class="p">,</span><span class="w">
+        </span><span class="s2">"name"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Messages"</span><span class="p">,</span><span class="w">
+        </span><span class="s2">"relations"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+          </span><span class="s2">"messages-documentation"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+            </span><span class="s2">"name"</span><span class="p">:</span><span class="w"> </span><span class="s2">"API Messages Resource Documentation"</span><span class="p">,</span><span class="w">
+            </span><span class="s2">"href"</span><span class="p">:</span><span class="w"> </span><span class="s2">"/docs/index.html#messages"</span><span class="w"> </span><span class="p">}}}}}}</span><span class="w">
+</span></pre></td></tr></tbody></table>
+</div>
+
+  </div>
+</div>
+
+<h3 id="collection-object">The Collection Object</h3>
+<div class="row">
+  <div class="col-md-6">
+
+    <p>The <em>collection</em> object semantically links to a number of structurally
+equivalent resources. Conventionally only url paths ending with a slash , e.g.
+<code>/tasks/</code>, will contain a collection. This convention is apparently violated
+by many sites and even frameworks.</p>
+
+    <p>The collection object must contain a <code>relations</code> key 
+which contains as described in the section <a href="#relations-object">relations object</a>.
+It is suggested to use integers as keys which represent 
+the index of the given link within the collection.</p>
+
+    <p>The collection can contain a <code>next</code> key with the value of a <a href="#relation-object">relation
+object</a> with the following restriction: the included url may not be
+templated. Clients use <code>next</code> to iterate of a paginated collection. API
+providers should keep the search parameters between successive next link
+(with the exception of the parameter used for pagination if present).</p>
+
+    <p>Any of the following two conditions signals the end of the collection for
+a client:</p>
+
+    <ol>
+      <li>The relations object is empty.</li>
+      <li>There is no next key.</li>
+    </ol>
+
+  </div>
+  <div class="col-md-6">
+
+<div class="highlight json"><table style="border-spacing: 0"><tbody><tr><td class="gutter gl" style="text-align: right"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+8
+9</pre></td><td class="code"><pre><span class="p">{</span><span class="s2">"_json-roa"</span><span class="w"> </span><span class="p">:</span><span class="w">
+  </span><span class="p">{</span><span class="w"> </span><span class="s2">"version"</span><span class="p">:</span><span class="w"> </span><span class="s2">"1.0.0"</span><span class="p">,</span><span class="w">
+    </span><span class="s2">"collection"</span><span class="p">:</span><span class="w"> 
+      </span><span class="p">{</span><span class="w"> </span><span class="s2">"next"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="s2">"href"</span><span class="p">:</span><span class="w"> </span><span class="s2">"/messages/?page=1"</span><span class="w"> </span><span class="p">},</span><span class="w">
+        </span><span class="s2">"relations"</span><span class="p">:</span><span class="w"> 
+          </span><span class="p">{</span><span class="w"> </span><span class="s2">"1"</span><span class="p">:</span><span class="w"> 
+            </span><span class="p">{</span><span class="w"> </span><span class="s2">"href"</span><span class="p">:</span><span class="w"> </span><span class="s2">"/messages/2f09edb9-5aec-460f-9e6a-5e9b980e8f05"</span><span class="p">},</span><span class="w"> 
+            </span><span class="s2">"2"</span><span class="p">:</span><span class="w"> 
+            </span><span class="p">{</span><span class="w"> </span><span class="s2">"href"</span><span class="p">:</span><span class="w"> </span><span class="s2">"/messages/4e762513-d903-4228-b92c-da4f0cb3094b"</span><span class="p">}}}}}</span><span class="w">
+</span></pre></td></tr></tbody></table>
+</div>
+
+  </div>
+</div>
+
+<h2 id="embedding-resources">Embedding Resources</h2>
+
+<div class="row">
+  <div class="col-md-6">
+
+    <p class="text-warning">Embedding resources is an experimental proposal. There does not exist any
+implementation or proof of concept at this time. Any changes related to this
+feature do not warrant a lifting of the major number!</p>
+
+    <p>A <a href="#relation-object">Relation Object</a> can contain the key <code>embedded</code>. The corresponding value
+map must be equal to the to JSON transformed response body given by requesting
+the resource with HTTP GET and receiving the representation of content-type
+<code>application/json-roa+json</code>. Therefore the following restrictions apply:</p>
+
+    <ol>
+      <li>The <code>href</code> value of the relation must not be a template url.</li>
+      <li>The http get method must be applicable to the resource.</li>
+    </ol>
+
+    <p>Handling of embedded resources must be completely transparent. I.e. clients
+must not depend on the existence of an embedded object. On the other hand are
+clients not required to honor <code>embedded</code> resources.</p>
+
+    <p>JSON-ROA does not define any technique how to negotiate respectively request
+embeddings. This is application and context dependent. A custom HTTP header
+seems to be appropriate for many cases.</p>
+
+  </div>
+  <div class="col-md-6"></div>
+</div>
+
+<div class="row">
+  <div class="col-md-6"></div>
+  <div class="col-md-6"></div>
+</div>
+
+
+</div>
+</body>
 </html>
